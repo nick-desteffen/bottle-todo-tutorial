@@ -1,14 +1,14 @@
 import sqlite3
-from bottle import route, run, debug, template, request, validate, static_file, error
+from bottle import route, run, debug, template, request, validate, static_file, error, redirect
 
-@route('/todo')
+@route('/')
 def todo_list():
   conn = sqlite3.connect('todo.db')
   c = conn.cursor()
   c.execute("SELECT id, task FROM todo WHERE status LIKE '1'")
   result = c.fetchall()
   c.close()
-  output = template('templates/make_table', rows=result)
+  output = template('templates/index', rows=result)
   return output
 
 
@@ -26,7 +26,8 @@ def new_item():
     conn.commit()
     c.close()
 
-    return '<p>The new task was inserted into the database, the ID is %s</p>' % new_id
+    #return '<p>The new task was inserted into the database, the ID is %s</p>' % new_id
+    redirect("/")
   else:
     return template('templates/new_task.tpl')
 
@@ -75,6 +76,11 @@ def show_item(item):
 @route('/help')
 def help():
   return static_file('help.html', root='templates')
+
+
+@route('/assets/<path:path>')
+def assets(path):
+    return static_file(path , root='assets')
 
 
 @route('/json:json#[1-9]+#')
